@@ -92,12 +92,15 @@ def credential_info(module, authentication_token):
     url = params["system_url"] + '/iso/pam/credential/'
 
     if params['id_credential'] is not None:
-        url += '{}?credential={}'.format(params['id_credential'], params['id_credential'])
+        url += f"{params['id_credential']}?credential={params['id_credential']}"
     elif params['identifier'] is not None:
-        url += '{}?credential={}'.format(params['identifier'], params['identifier'])
+        url += f"{params['identifier']}?credential={params['identifier']}"
 
-    headers = {'Content-Type': 'application/json',
-               "Authorization": 'Bearer {}'.format(authentication_token)}
+    headers = {
+        'Content-Type': 'application/json',
+        "Authorization": f'Bearer {authentication_token}',
+    }
+
 
 
     r = iso_request(module, url, method="GET", headers=headers, required_http_code=[200])

@@ -174,7 +174,7 @@ def ensure_credential(module, authentication_token):
 
     url = params['system_url'] + '/iso/pam/credential'
 
-    headers = {"Authorization": 'Bearer {}'.format(authentication_token)}
+    headers = {"Authorization": f'Bearer {authentication_token}'}
 
     # Optional parameters
     if params['password']:
@@ -199,10 +199,7 @@ def ensure_credential(module, authentication_token):
     result = {"result": r.json()}
 
     if "changed" in result["result"]["response"]:
-        if result["result"]["response"]["changed"] == "true":
-            changed = True
-        else:
-            changed = False
+        changed = result["result"]["response"]["changed"] == "true"
     else:
         changed = True
 
@@ -217,24 +214,23 @@ def ensure_absent_credential(module, authentication_token):
     """
     params = module.params
 
-    url = params['system_url'] + '/iso/pam/credential/{}'.format(params['identifier'])
+    url = params['system_url'] + f"/iso/pam/credential/{params['identifier']}"
 
     payload = {
         "identifier": params["identifier"]
     }
 
-    headers = {'Content-Type': 'application/json',
-               "Authorization": 'Bearer {}'.format(authentication_token)}
+    headers = {
+        'Content-Type': 'application/json',
+        "Authorization": f'Bearer {authentication_token}',
+    }
+
 
 
     r = iso_request(module, url, method="DELETE", headers=headers, data=payload, required_http_code=[200,201,400])
 
     # Check idempotency status
-    if r.status_code == 400:
-        changed = False
-    else:
-        changed = True
-
+    changed = r.status_code != 400
     result = {"result": r.json()}
     return (changed, result, r.status_code)
 

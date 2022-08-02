@@ -19,7 +19,7 @@ def authenticate(module):
 		server to get the token for execute main actions
 	"""
 
-	url = '{}/iso/oauth2/token'.format(module.params["system_url"])
+	url = f'{module.params["system_url"]}/iso/oauth2/token'
 
 	data = {
 		'grant_type': 'client_credentials',
@@ -70,7 +70,10 @@ def iso_request(module, url, method="GET", data={}, headers={}, required_http_co
 			resp = requests.get(url, headers=headers, verify=module.params["validate_certs"])
 
 		if resp.status_code not in required_http_code:
-			module.fail_json(msg="Error: HTTP {}".format(resp.status_code), payload=data, status_code=-1)
+			module.fail_json(
+				msg=f"Error: HTTP {resp.status_code}", payload=data, status_code=-1
+			)
+
 
 		return resp
 

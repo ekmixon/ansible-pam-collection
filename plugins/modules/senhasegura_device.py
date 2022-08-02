@@ -150,7 +150,7 @@ status_code:
 def ensure_device(module, authentication_token):
     params = module.params
 
-    headers = {"Authorization": 'Bearer {}'.format(authentication_token)}
+    headers = {"Authorization": f'Bearer {authentication_token}'}
 
     url = params['system_url'] + '/iso/pam/device'
 
@@ -179,10 +179,7 @@ def ensure_device(module, authentication_token):
 
     # Check idempotency
     if "changed" in result["result"]["response"]:
-        if result["result"]["response"]["changed"] == "true":
-            changed = True
-        else:
-            changed = False
+        changed = result["result"]["response"]["changed"] == "true"
     else:
         changed = True
 
@@ -193,23 +190,20 @@ def ensure_absent_device(module, authentication_token):
     params = module.params
 
     url = params['system_url'] + '/iso/pam/device'
-    headers = {"Authorization": 'Bearer {}'.format(authentication_token)}
+    headers = {"Authorization": f'Bearer {authentication_token}'}
 
-    payload = {}
-
-    url += '/{}'.format(params['hostname'])
-    payload['device'] = params['hostname']
-
+    url += f"/{params['hostname']}"
+    payload = {'device': params['hostname']}
     r = iso_request(module, url, method="DELETE", headers=headers,
                     data=payload, required_http_code=[200, 400, 404])
 
-    if r.status_code == 400:
-        # Device deactivated or not found
-        changed = False
-    elif r.status_code == 200:
+    if r.status_code == 200:
         # Device deactivated
         changed = True
 
+    elif r.status_code == 400:
+        # Device deactivated or not found
+        changed = False
     result = {"result": r.json()}
     return (changed, result, r.status_code)
 
